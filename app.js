@@ -477,7 +477,7 @@ function getTranslation(key) {
 }
 
 // ── THEME SWITCHER ──
-let currentTheme = 'dark';
+let currentTheme = 'light';
 
 function toggleTheme() {
   currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -1403,6 +1403,8 @@ map.on('click', function(e) {
 
 
 // ── INIT ──
+document.body.className = 'light-theme';
+document.getElementById('themeToggleBtn').textContent = '☀️';
 document.getElementById('endDate').value = new Date().toISOString().slice(0,10);
 document.getElementById('minMag').addEventListener('input', e => {
   document.getElementById('magVal').textContent = parseFloat(e.target.value).toFixed(1);

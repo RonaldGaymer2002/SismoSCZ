@@ -18,11 +18,15 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100vh;
+  overflow: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -177,14 +181,13 @@ header {
   border-color: var(--text);
 }
 
-/* ── LAYOUT ── */
 .main {
   flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 320px 1fr;
   grid-template-rows: 1fr;
   overflow: hidden;
-  height: calc(100vh - 120px);
 }
 
 /* ── SIDEBAR ── */
@@ -926,6 +929,7 @@ body.light-theme .building-marker-icon {
   bottom: 24px;
   left: 344px; /* Align to the right of the left sidebar */
   right: auto;
+  bottom: 24px;
   background: var(--card);
   border: 1px solid var(--accent);
   border-radius: 10px;
