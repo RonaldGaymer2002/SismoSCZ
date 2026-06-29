@@ -1411,3 +1411,68 @@ document.getElementById('minMag').addEventListener('input', e => {
 });
 document.getElementById('viewMode').addEventListener('change', () => renderMap(allData));
 loadData();
+
+// ── DYNAMIC SEISMOGRAPH WAVEFORM DRAWING ──
+const seismographCanvas = document.getElementById('seismographCanvas');
+const sCtx = seismographCanvas.getContext('2d');
+const seismoPoints = [];
+const seismoMaxPoints = 120;
+
+function drawSeismograph() {
+  sCtx.clearRect(0, 0, seismographCanvas.width, seismographCanvas.height);
+  
+  // Draw grid lines
+  sCtx.strokeStyle = currentTheme === 'light' ? '#e2e8f0' : '#1e293b';
+  sCtx.lineWidth = 0.5;
+  const gridSize = 10;
+  for (let x = 0; x < seismographCanvas.width; x += gridSize) {
+    sCtx.beginPath();
+    sCtx.moveTo(x, 0);
+    sCtx.lineTo(x, seismographCanvas.height);
+    sCtx.stroke();
+  }
+  for (let y = 0; y < seismographCanvas.height; y += gridSize) {
+    sCtx.beginPath();
+    sCtx.moveTo(0, y);
+    sCtx.lineTo(seismographCanvas.width, y);
+    sCtx.stroke();
+  }
+  
+  // Generate random tremor noise base
+  let noise = (Math.random() - 0.5) * 2;
+  
+  // Spike seismograph wave dynamically if map is shaking!
+  const mapDiv = document.getElementById('map');
+  if (mapDiv.classList.contains('shake-violent')) {
+    noise = (Math.random() - 0.5) * 32;
+  } else if (mapDiv.classList.contains('shake-moderate')) {
+    noise = (Math.random() - 0.5) * 16;
+  } else if (mapDiv.classList.contains('shake-mild')) {
+    noise = (Math.random() - 0.5) * 6;
+  }
+  
+  seismoPoints.push(seismographCanvas.height / 2 + noise);
+  if (seismoPoints.length > seismoMaxPoints) {
+    seismoPoints.shift();
+  }
+  
+  // Draw continuous red waveform line
+  sCtx.strokeStyle = '#ef4444'; // Seismograph red ink
+  sCtx.lineWidth = 1.5;
+  sCtx.beginPath();
+  for (let i = 0; i < seismoPoints.length; i++) {
+    const x = (seismographCanvas.width / seismoMaxPoints) * i;
+    const y = seismoPoints[i];
+    if (i === 0) {
+      sCtx.moveTo(x, y);
+    } else {
+      sCtx.lineTo(x, y);
+    }
+  }
+  sCtx.stroke();
+  
+  requestAnimationFrame(drawSeismograph);
+}
+
+// Start Seismograph rendering loop
+drawSeismograph();
