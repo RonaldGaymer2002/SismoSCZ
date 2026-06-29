@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="docTitle">Riesgo Sísmico · Santa Cruz, Bolivia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌎</div>
+      <div class="logo-text">
+        <h1 id="headerTitle">Riesgo Sísmico — Santa Cruz</h1>
+        <p id="headerSubtitle">Dpto. Santa Cruz de la Sierra · Bolivia · Fuente: USGS ComCat</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+        <option value="qu">Quechua (Runasimi)</option>
+        <option value="ay">Aymara</option>
+        <option value="gn">Guaraní</option>
+        <option value="fr">Français</option>
+        <option value="pt">Português</option>
+        <option value="zh">中文 (Chino)</option>
+        <option value="ja">日本語 (Japonés)</option>
+      </select>
+      <button id="themeToggleBtn" class="theme-btn" onclick="toggleTheme()">🌙</button>
+      <div class="status-pill" id="statusPill">
+        <div class="dot"></div> Datos en tiempo real
+      </div>
+    </div>
+  </header>
+
+  <div class="filters">
+    <label id="lblStartDate">Desde:</label>
+    <input type="date" id="startDate" value="2000-01-01"
+      style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;" />
+    <label id="lblEndDate">Hasta:</label>
+    <input type="date" id="endDate"
+      style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;" />
+    <label id="lblMinMag">Mag. mín:</label>
+    <input type="range" id="minMag" min="1" max="6" step="0.5" value="2" style="width:80px;" />
+    <span class="range-val" id="magVal">2.0</span>
+    <label id="lblViewMode">Vista:</label>
+    <select id="viewMode">
+      <option value="heat" id="optHeat">Mapa de calor</option>
+      <option value="points" id="optPoints">Epicentros</option>
+      <option value="both" id="optBoth">Ambos</option>
+    </select>
+    <button class="btn" id="btnUpdate" onclick="loadData()">🔄 Actualizar</button>
+    <button class="btn btn-ghost" id="btnExport" onclick="exportCSV()">⬇ Exportar CSV</button>
+    <button class="btn" id="btnSim" style="background:var(--accent2);" onclick="toggleSimulationPanel()" title="Iniciar simulación sísmica">⚡ Simulación</button>
+  </div>
+
+  <div class="main" style="position:relative;">
+    <div id="loading">
+      <div class="spinner"></div>
+      <p id="lblLoading">Consultando USGS ComCat…</p>
+    </div>
+
+    <!-- FLOATING SIMULATION PANEL -->
+    <div id="simPanel" class="sim-panel">
+      <div class="sim-header">
+        <span class="sim-title" id="simPanelTitle">Simulador de Sismos</span>
+        <button class="sim-close" onclick="toggleSimulationPanel()">✕</button>
+      </div>
+      <span class="sim-subtitle" id="simPanelSubtitle">Santa Cruz, Bolivia</span>
+      <div class="sim-btn-group">
+        <button id="simTerremotoBtn" class="sim-sub-btn" onclick="selectSimType('terremoto')">💥 Terremoto (M≥5.0)</button>
+        <button id="simSismoBtn" class="sim-sub-btn sismo" onclick="selectSimType('sismo')">🔔 Sismo (M&lt;5.0)</button>
+      </div>
+
+      <!-- MAGNITUDE SLIDER -->
+      <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+        <label
+          style="font-size: 11px; font-family: var(--mono); color: var(--muted); display: flex; justify-content: space-between; align-items: center;">
+          <span id="lblSimMag">Magnitud:</span>
+          <span class="range-val" id="simMagVal" style="color:var(--accent); font-weight:700;">5.0</span>
+        </label>
+        <input type="range" id="simMag" min="5.0" max="12.0" step="0.1" value="5.0" style="width:100%; cursor:pointer;"
+          oninput="updateSimMagVal(this.value)" />
+      </div>
+
+      <div class="sim-info-box" id="simInfoBox">
+        Haga clic en el mapa para marcar el epicentro de la simulación.
+      </div>
+
+      <button id="btnStartSim" class="btn-start-sim" disabled onclick="executeSimulation()">
+        🔥 Iniciar Simulación
+      </button>
+
+      <!-- SILENCE BUTTON -->
+      <button id="btnStopSiren" class="sim-sub-btn"
+        style="background:#2a0e0e; border-color:#e85d2f; color:#e85d2f; display:none; padding: 6px; margin-top: 6px;"
+        onclick="stopSiren()">
+        🔇 Silenciar Sirena
+      </button>
+    </div>
+
+    <!-- PERSISTENT SIMULATION RESULT PANEL -->
+    <div id="simResultPanel" class="sim-result-panel">
+      <div class="sim-result-header">
+        <span class="sim-result-title" id="simResultTitle">Reporte de Simulación</span>
+        <button class="sim-result-close" onclick="closeResultPanel()">✕</button>
+      </div>
+      <div class="sim-result-body" id="simResultBody">
+        Selecciona un epicentro en el mapa y haz clic en Iniciar Simulación.
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <div>
+        <div class="section-title" id="titleCatalog">Resumen del catálogo</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="val" id="statTotal">—</div>
+            <div class="lbl" id="lblStatTotal">Sismos totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="val orange" id="statMaxMag">—</div>
+            <div class="lbl" id="lblStatMaxMag">Magnitud máx.</div>
+          </div>
+          <div class="stat-card">
+            <div class="val green" id="statAvgDepth">—</div>
+            <div class="lbl" id="lblStatAvgDepth">Prof. prom. (km)</div>
+          </div>
+          <div class="stat-card">
+            <div class="val red" id="statHigh">—</div>
+            <div class="lbl" id="lblStatHigh">Mag. ≥ 4.0</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" id="titleConcentration">Zonas de mayor concentración sísmica</div>
+        <div class="zone-list" id="zoneList">
+          <div style="color:var(--muted);font-size:12px;" id="lblCalculating">Calculando…</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" id="titleMagDistribution">Distribución por magnitud</div>
+        <div class="mag-bars" id="magBars">
+          <div style="color:var(--muted);font-size:12px;" id="lblLoadingMag">Cargando…</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" id="titleFeaturedEvents">Últimos eventos destacados</div>
+        <div class="event-list" id="eventList">
+          <div style="color:var(--muted);font-size:12px;" id="lblLoadingEvents">Cargando…</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAP -->
+    <div id="map"></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
