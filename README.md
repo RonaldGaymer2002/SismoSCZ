@@ -27,7 +27,14 @@ Al activar el modo simulación, la plataforma se desconecta de los datos reales 
   - **Sismo Leve / Tremor:** Magnitud de $0.1$ a $5.0$.
   - **Terremoto Catastrófico:** Magnitud de $5.0$ a $12.0$.
 
-### 4. Animaciones y Sonido Reactivo
+### 4. Diseño Adaptable y Responsivo Experto (Móvil Android / iOS)
+La plataforma ha sido optimizada con un diseño responsivo de alto impacto estético y funcional para celulares y tabletas:
+- **Navegación por Pestañas:** En celulares (<768px), la interfaz se transforma en una aplicación móvil nativa con una barra de navegación inferior para cambiar fluidamente entre la vista de **Mapa** (`🗺️ Mapa`) y la vista de reportes/gráficos (`📊 Estadísticas`).
+- **Filtros Colapsables:** La barra de filtros en móviles se reduce a un encabezado interactivo (`🔍 Filtros y Parámetros`). Al pulsarlo, despliega un cajón vertical táctil con todos los controles en tamaño amigable para dedos.
+- **Hojas Inferiores de Simulación (Bottom Sheets):** En móviles, el simulador de sismos y los reportes de daños se deslizan suavemente desde la parte inferior de la pantalla (estilo *Bottom Sheets* nativo), liberando espacio para interactuar directamente con el mapa.
+- **Auto-Reajuste de Mapa:** Implementación del método `map.invalidateSize()` al cargar la ventana o cambiar de pestaña para garantizar una renderización perfecta del mapa sin cuadrantes grises.
+
+### 5. Animaciones y Sonido Reactivo
 - **Sacudida de Pantalla (Screen Shake):** Dependiendo de la magnitud seleccionada, el mapa vibra con tres intensidades de CSS diferentes:
   - `shake-mild` (Magnitud < 4.0): Vibración suave durante 1.5s.
   - `shake-moderate` (Magnitud 4.0 - 7.0): Sacudida notable durante 3.0s.
