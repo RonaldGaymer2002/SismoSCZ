@@ -692,10 +692,14 @@ function renderMap(data) {
   const heatPts = data.map(e => [e.lat, e.lng, Math.min(e.mag / 6, 1)]);
 
   if (mode === 'heat' || mode === 'both') {
-    heatLayer = L.heatLayer(heatPts, {
-      radius: 28, blur: 20, maxZoom: 10,
-      gradient: { 0.0:'#0a0d12', 0.2:'#0d2b5e', 0.45:'#3d6fc4', 0.65:'#f0a500', 0.85:'#e85d2f', 1.0:'#ff1a1a' }
-    }).addTo(map);
+    try {
+      heatLayer = L.heatLayer(heatPts, {
+        radius: 28, blur: 20, maxZoom: 10,
+        gradient: { 0.0:'#0a0d12', 0.2:'#0d2b5e', 0.45:'#3d6fc4', 0.65:'#f0a500', 0.85:'#e85d2f', 1.0:'#ff1a1a' }
+      }).addTo(map);
+    } catch (e) {
+      console.warn("Map container is not ready for heatLayer yet:", e);
+    }
   }
 
   if (mode === 'points' || mode === 'both') {
@@ -1411,6 +1415,16 @@ document.getElementById('minMag').addEventListener('input', e => {
 });
 document.getElementById('viewMode').addEventListener('change', () => renderMap(allData));
 loadData();
+
+// Re-invalidate size and re-render map when window has completely loaded and settled
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if (typeof map !== 'undefined') {
+      map.invalidateSize();
+      renderMap(allData);
+    }
+  }, 200);
+});
 
 // ── DYNAMIC SEISMOGRAPH WAVEFORM DRAWING ──
 const seismographCanvas = document.getElementById('seismographCanvas');
