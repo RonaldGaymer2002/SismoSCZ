@@ -1476,3 +1476,38 @@ function drawSeismograph() {
 
 // Start Seismograph rendering loop
 drawSeismograph();
+
+// ── MOBILE RESPONSIVE NAVIGATION & INTERACTION ──
+
+function switchMobileTab(tabName) {
+  const mainContainer = document.querySelector('.main');
+  const tabMapBtn = document.getElementById('btnTabMap');
+  const tabStatsBtn = document.getElementById('btnTabStats');
+  
+  if (!mainContainer) return;
+  
+  if (tabName === 'map') {
+    mainContainer.classList.remove('view-stats');
+    if (tabMapBtn) tabMapBtn.classList.add('active');
+    if (tabStatsBtn) tabStatsBtn.classList.remove('active');
+    
+    // Refresh Leaflet map layout to prevent grey/unrendered tiles
+    if (typeof map !== 'undefined') {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+  } else if (tabName === 'stats') {
+    mainContainer.classList.add('view-stats');
+    if (tabMapBtn) tabMapBtn.classList.remove('active');
+    if (tabStatsBtn) tabStatsBtn.classList.add('active');
+  }
+}
+
+function toggleFiltersMobile() {
+  const filtersBar = document.getElementById('filtersBar');
+  if (filtersBar) {
+    filtersBar.classList.toggle('open');
+  }
+}
+

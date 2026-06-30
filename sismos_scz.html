@@ -21,14 +21,11 @@
 
   <header>
     <div class="logo">
-      <div class="spinning-globe">🌎</div>
+      <div class="logo-icon">🌎</div>
       <div class="logo-text">
         <h1 id="headerTitle">Riesgo Sísmico — Santa Cruz</h1>
         <p id="headerSubtitle">Dpto. Santa Cruz de la Sierra · Bolivia · Fuente: USGS ComCat</p>
       </div>
-    </div>
-    <div class="header-center">
-      <canvas id="seismographCanvas" width="300" height="40"></canvas>
     </div>
     <div class="header-right">
       <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
@@ -74,7 +71,8 @@
       </select>
       <button class="btn" id="btnUpdate" onclick="loadData()">🔄 Actualizar</button>
       <button class="btn btn-ghost" id="btnExport" onclick="exportCSV()">⬇ Exportar CSV</button>
-      <button class="btn" id="btnSim" style="background:var(--accent2);" onclick="toggleSimulationPanel()" title="Iniciar simulación sísmica">⚡ Simulación</button>
+      <button class="btn" id="btnSim" style="background:var(--accent2);" onclick="toggleSimulationPanel()"
+        title="Iniciar simulación sísmica">⚡ Simulación</button>
     </div>
   </div>
 
@@ -92,7 +90,8 @@
       </div>
       <span class="sim-subtitle" id="simPanelSubtitle">Santa Cruz, Bolivia</span>
       <div class="sim-btn-group">
-        <button id="simTerremotoBtn" class="sim-sub-btn" onclick="selectSimType('terremoto')">💥 Terremoto (M≥5.0)</button>
+        <button id="simTerremotoBtn" class="sim-sub-btn" onclick="selectSimType('terremoto')">💥 Terremoto
+          (M≥5.0)</button>
         <button id="simSismoBtn" class="sim-sub-btn sismo" onclick="selectSimType('sismo')">🔔 Sismo (M&lt;5.0)</button>
       </div>
 
